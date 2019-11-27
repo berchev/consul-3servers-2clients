@@ -1,15 +1,18 @@
+# Any single server details
 server = [
   { hostname: "consul-server1", ip: "192.168.10.11", port: 8501, box: "berchev/xenial64" },
   { hostname: "consul-server2", ip: "192.168.10.12", port: 8502, box: "berchev/xenial64" },
   { hostname: "consul-server3", ip: "192.168.10.13", port: 8503, box: "berchev/xenial64" }
 ]
 
+# Any single clinet details
 client = [
   { hostname: "consul-client1", ip: "192.168.10.21", box: "berchev/nginx64" },
   { hostname: "consul-client2", ip: "192.168.10.22", box: "berchev/nginx64" }
 ]
 
 
+# Provision of servers and clinets using above details
 Vagrant.configure("2") do |config|
   server.each do |server|
     config.vm.define server[:hostname] do |node|
