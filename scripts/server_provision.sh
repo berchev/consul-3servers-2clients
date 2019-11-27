@@ -85,6 +85,7 @@ cat << EOF > ${consul_config_dir}/consul_server.json
     "enable_syslog": true,
     "enable_debug": true,
     "node_name": "${node_name}",
+    "encrypt": "MKEil2csBITR17ZN6Bueipp3hhR7iUOrYNjsMiWE+Yc=",
     "server": true,
     "client_addr": "0.0.0.0",
     "bootstrap_expect": 3,
