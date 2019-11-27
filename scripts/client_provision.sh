@@ -85,6 +85,7 @@ cat << EOF > ${consul_config_dir}/consul_client.json
  "enable_syslog": true,
  "enable_debug": true,
  "node_name": "${node_name}",
+ "encrypt": "MKEil2csBITR17ZN6Bueipp3hhR7iUOrYNjsMiWE+Yc=",
  "server": false,
  "rejoin_after_leave": true,
  "retry_join": ["192.168.10.11","192.168.10.12","192.168.10.13"]

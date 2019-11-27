@@ -5,8 +5,8 @@ server = [
 ]
 
 client = [
-  { hostname: "consul-client1", ip: "192.168.10.21", box: "berchev/xenial64" },
-  { hostname: "consul-client2", ip: "192.168.10.22", box: "berchev/xenial64" }
+  { hostname: "consul-client1", ip: "192.168.10.21", box: "berchev/nginx64" },
+  { hostname: "consul-client2", ip: "192.168.10.22", box: "berchev/nginx64" }
 ]
 
 
@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
       node.vm.hostname = client[:hostname]
       node.vm.network "private_network", ip: client[:ip]
       node.vm.provision :shell, path: "scripts/client_provision.sh", env: { "ip_client" => client[:ip], "node_name" => client[:hostname] }
+      node.vm.provision :shell, path: "scripts/client_service.sh"
     end
   end 
 end
