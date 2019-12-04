@@ -23,4 +23,5 @@ EOF
 }
 
 # Reload with new configuration
-consul reload
+systemctl enable consul
+systemctl start consul

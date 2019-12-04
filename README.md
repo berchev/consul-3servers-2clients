@@ -1,4 +1,4 @@
-# consul-3servers-2clinets
+# consul-3servers-2clients
 
 ## Repo description
 This repo provides Vagrant development environment containing simple configuration of 3 Consul Servers and 2 Consul Clients. 
@@ -10,10 +10,12 @@ Some more details:
 - All nodes have syslog logging enabled
 - All nodes have configured data directory and configuration directory
 - All nodes are with included gossip encryption.
+- Connection between servers and clients has TLS encryption
+- All needed CA, TLS/SSL certificates are generated with consul
 
 For more details related to Consul Server/Client configuration, you can check [server_provision.sh](https://github.com/berchev/consul-3servers-2clients/blob/master/scripts/server_provision.sh) and [client_provision.sh](https://github.com/berchev/consul-3servers-2clients/blob/master/scripts/client_provision.sh) scripts.
 
-This project can be used as a fundametal step for other consul related project.
+This project can be used as a fundamental step for other consul related project.
 
 ## Requirements
 - VirtualBox installed
@@ -42,18 +44,39 @@ above with their current state. For more information about a specific
 VM, run `vagrant status NAME`.
 georgiman@MacBook-Machine consul-3servers-2clients (add-service) $ 
 ```
-- shh to node by your choice (for example: consul-server1)
+- ssh to node consul-server1
 ```
 georgiman@MacBook-Machine consul-3servers-2clients (add-service) $ vagrant ssh consul-server1
 ```
-- reach the web UI and walk through different menus, by visiting URL below
+
+- change to /vagrant/certificate-authority and verify that TLS is working. The result should be error:
 ```
-http://192.168.10.11:8500/
+vagrant@consul-server1:/vagrant/certificate-authority$ consul members -http-addr="https://192.168.10.11:8551"
+Error retrieving members: Get https://192.168.10.11:8551/v1/agent/members?segment=_all: x509: certificate signed by unknown authority
+vagrant@consul-server1:/vagrant/certificate-authority$ 
+```
+- Stay on the same dir and now provide all needed certificates(CA public, Digital certificate public and private):
+```
+vagrant@consul-server1:/vagrant/certificate-authority$ consul members -ca-file=consul-agent-ca.pem -client-cert=tls-ssl-cli-ui/dc1-cli-consul-0.pem   -client-key=tls-ssl-cli-ui/dc1-cli-consul-0-key.pem -http-addr="https://192.168.10.11:8551"
+Node            Address             Status  Type    Build  Protocol  DC   Segment
+consul-server1  192.168.10.11:8301  alive   server  1.6.2  2         dc1  <all>
+consul-server2  192.168.10.12:8301  alive   server  1.6.2  2         dc1  <all>
+consul-server3  192.168.10.13:8301  alive   server  1.6.2  2         dc1  <all>
+consul-client1  192.168.10.21:8301  alive   client  1.6.2  2         dc1  <default>
+consul-client2  192.168.10.22:8301  alive   client  1.6.2  2         dc1  <default>
+vagrant@consul-server1:/vagrant/certificate-authority$ 
 ```
 - in case you do not need the project anymore
 ```
 georgiman@MacBook-Machine consul-3servers-2clients (add-service) $ vagrant destroy -f
 ```
 
+## Remark
+You cannot reach the UI interface, unless you do the following:
+- add `consul-agent-ca.pem` to your Keychain
+- using openssl create `.p12` certificate from `dc1-cli-consul-0.pem` and `dc1-cli-consul-0-key.pem`
+- Add the resulted `.p12` file to your Keychain
+- For convenience I have added `certificate-authority/tls-ssl-cli-ui/certificate.p12` certificate ready for import
+
 ## TODO
-- [ ] Secure Agent Communication with TLS Encryption
+- [x] Secure Agent Communication with TLS Encryption

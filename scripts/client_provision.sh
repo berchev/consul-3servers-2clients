@@ -99,6 +99,29 @@ funcOwnership ${consul_config_dir}/consul_client.json
 # Verify the permissions of main consul configuration (consul_client.json) and fix if needed
 funcPermissions ${consul_config_dir}/consul_client.json
 
+# Adding client TLS configuration
+# Configuration contain environment variables
+[ -f ${consul_config_dir}/tls_consul_client.json ] || {
+cat << EOF > ${consul_config_dir}/tls_consul_client.json
+{
+  "ca_file": "/vagrant/certificate-authority/consul-agent-ca.pem",
+  "auto_encrypt": {
+    "tls": true
+  },
+  "ports": {
+    "http": -1,
+    "https": ${tls_port}
+  }
+}
+EOF
+}
+
+# Verify the ownership of main consul configuration (tls_consul_client.json) and fix if needed
+funcOwnership ${consul_config_dir}/tls_consul_client.json
+
+# Verify the permissions of main consul configuration (tls_consul_cient.json) and fix if needed
+funcPermissions ${consul_config_dir}/tls_consul_client.json
+
 # Add consul target into systemd, if not added
 [ -f /etc/systemd/system/consul.service ] || {
 cat << EOF > /etc/systemd/system/consul.service
@@ -122,6 +145,4 @@ LimitNOFILE=65536
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable consul
-systemctl start consul
 }
