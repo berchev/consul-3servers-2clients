@@ -91,6 +91,8 @@ cat << EOF > ${consul_config_dir}/consul_server.json
     "bootstrap_expect": 3,
     "rejoin_after_leave": true,
     "ui": true,
+    "enable_script_checks": false,
+    "disable_remote_exec": true,
     "retry_join": ["${ip_server2}"]
 }
 EOF
@@ -101,6 +103,34 @@ funcOwnership ${consul_config_dir}/consul_server.json
 
 # Verify the permissions of main consul configuration (consul_server.json) and fix if needed
 funcPermissions ${consul_config_dir}/consul_server.json
+
+# Adding server TLS configuration
+# Configuration contain environment variables
+[ -f ${consul_config_dir}/tls_consul_server.json ] || {
+cat << EOF > ${consul_config_dir}/tls_consul_server.json
+{
+  "verify_incoming": true,  
+  "verify_outgoing": true,
+  "verify_server_hostname": true,
+  "auto_encrypt": {
+    "allow_tls": true
+  },
+  "ca_file": "/vagrant/certificate-authority/consul-agent-ca.pem",
+  "cert_file": "/vagrant/certificate-authority/tls-ssl-server/dc1-server-consul.pem",
+  "key_file": "/vagrant/certificate-authority/tls-ssl-server/dc1-server-consul-key.pem",
+  "ports": {
+    "http": -1,
+    "https": ${tls_port}
+  }
+}
+EOF
+}
+
+# Verify the ownership of main consul configuration (tls_consul_server.json) and fix if needed
+funcOwnership ${consul_config_dir}/tls_consul_server.json
+
+# Verify the permissions of main consul configuration (tls_consul_server.json) and fix if needed
+funcPermissions ${consul_config_dir}/tls_consul_server.json
 
 # Add consul target into systemd, if not added
 [ -f /etc/systemd/system/consul.service ] || {
